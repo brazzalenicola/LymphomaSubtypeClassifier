@@ -20,6 +20,14 @@ import random
 
 # print(tf.__version__)
 def extract_patches(X_set, y_lab):
+    """
+    Args:
+        images set: numpy array containing the images to be processed to extract patches
+        labels: numpy array containing the corresponding labels of the images set
+    Return:
+        patches: numpy array containing all the patches for each image
+        labels: numpy array containing the labels for each patch
+    """
     # Patches of 64x64 size
     ksizes = [1, 64, 64, 1]
     # We don't want overlapping patches, so the distance between the two centers is 64
@@ -39,6 +47,16 @@ def extract_patches(X_set, y_lab):
 
 
 def load_dataset(path):
+    """
+    Args:
+        path: string, path to the folder containing the downloaded datasets
+    Return:
+        train_images, test_images: numpy tensors containing
+                the training and test images
+                [image_num, height, width, channels]
+        train_labels, test_labels: list of int, they containing the correct class indices for
+                                    each of the images in train_images, test_images
+    """
     data_dir = pathlib.Path(path)
     IMG_SIZE = len(list(data_dir.glob('*/*.tif')))
     CLASSES = list([item.name for item in data_dir.glob('*') if item.name != ".DS_Store"])
