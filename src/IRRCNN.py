@@ -1,13 +1,7 @@
-import tensorflow as tf
 import tensorflow.keras as keras
-
-from tensorflow.keras.models import Sequential
-from tensorflow.keras import layers
-from tensorflow.keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D, Add
-from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D
-from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Activation, BatchNormalization, Conv2D, Add
+from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalAveragePooling2D
 from tensorflow.keras import backend as K
-
 
 # Convolution 2D with batch normalization
 def conv_bn(x, nb_filter, num_row, num_col, padding='same', strides=(1, 1), use_bias=False):

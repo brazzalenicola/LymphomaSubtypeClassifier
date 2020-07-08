@@ -1,4 +1,5 @@
 import tensorflow as tf
+import tensorflow.keras as keras
 # Helper libraries
 import numpy as np
 from matplotlib import gridspec
@@ -141,3 +142,7 @@ if __name__ == '__main__':
 
     model = tf.keras.models.Model(inputs, x, name='IRCNN')
     model.summary()
+
+    model.compile(loss='sparse_categorical_crossentropy', optimizer= keras.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999), metrics=["accuracy"])
+    model.fit(x = X_train, y = y_train, epochs=3, batch_size=16)
+
