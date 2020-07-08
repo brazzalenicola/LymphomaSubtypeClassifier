@@ -31,7 +31,7 @@ def RCL(input, kernel_size, filedepth):
         channel_axis = -1
 
     conv1 = Conv2D(filters=filedepth, kernel_size=kernel_size, strides=(1, 1), padding='same',
-                   kernel_regularizer=keras.regularizers.l2(1e-5),
+                   kernel_regularizer=keras.regularizers.l2(1e-4),
                    kernel_initializer=keras.initializers.VarianceScaling(scale=2.0, mode='fan_in',
                                                                          distribution='normal', seed=None))(input)
 
