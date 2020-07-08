@@ -1,11 +1,4 @@
 import tensorflow as tf
-import tensorflow.keras as keras
-
-# from keras.models import Sequential
-# from keras import layers
-# from keras.layers import Input, Dense, Activation, ZeroPadding2D, BatchNormalization, Flatten, Conv2D
-# from keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalMaxPooling2D, GlobalAveragePooling2D
-# from keras.models import Model
 # Helper libraries
 import numpy as np
 from matplotlib import gridspec
@@ -16,9 +9,13 @@ import os
 import pathlib
 import cv2
 import random
+from tensorflow.keras import backend as K
 
 
 # print(tf.__version__)
+from src import IRRCNN
+
+
 def extract_patches(X_set, y_lab):
     """
     Args:
@@ -127,3 +124,20 @@ if __name__ == '__main__':
     print("Y_train shape: " + str(y_train.shape))
     print("X_test shape: " + str(X_test.shape))
     print("Y_test shape: " + str(y_test.shape))
+
+    #IRRCNN model
+
+    image_size = 64
+    no_classes = 3
+
+    if K.image_data_format() == 'channels_first':
+        inputs = tf.keras.layers.Input(shape=(3, image_size, image_size))
+    else:
+        inputs = tf.keras.layers.Input(shape=(image_size, image_size, 3))
+
+    x = tf.keras.layers.Conv2D(32, (3, 3), strides=(2,2), padding='valid')(inputs)
+    x = IRRCNN.IRCNN_model(x)
+    x = tf.keras.layers.Dense(units=no_classes, activation='softmax')(x)
+
+    model = tf.keras.models.Model(inputs, x, name='IRCNN')
+    model.summary()
