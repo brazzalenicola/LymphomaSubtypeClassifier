@@ -1,7 +1,9 @@
+import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras.layers import Activation, BatchNormalization, Conv2D, Add
 from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalAveragePooling2D
 from tensorflow.keras import backend as K
+
 
 # Convolution 2D with batch normalization
 def conv_bn(x, nb_filter, num_row, num_col, padding='same', strides=(1, 1), use_bias=False):
@@ -38,13 +40,13 @@ def RCL(input, kernel_size, filedepth):
     stack2 = BatchNormalization(axis=channel_axis, momentum=0.9997, scale=False)(conv1)
     stack2 = Activation('relu')(stack2)
 
-    recurrent_layer = Conv2D(filters=filedepth, kernel_size=kernel_size, strides=(1, 1), padding='same',
+    RCL = Conv2D(filters=filedepth, kernel_size=kernel_size, strides=(1, 1), padding='same',
                              kernel_regularizer=keras.regularizers.l2(0.00004),
                              kernel_initializer=keras.initializers.VarianceScaling(scale=2.0, mode='fan_in',
                                                                                    distribution='normal',
                                                                                    seed=None))
 
-    conv2 = recurrent_layer(stack2)
+    conv2 = RCL(stack2)
     stack3 = Add()([conv1, conv2])
     stack4 = BatchNormalization(axis=channel_axis, momentum=0.9997, scale=False)(stack3)
     stack4 = Activation('relu')(stack4)
@@ -87,15 +89,14 @@ def IRCNN_block(input):
     return x
 
 
-def IRCNN_model(input):
+def IRRCNN_model(input):
     if K.image_data_format() == 'channels_first':
-        #     inputShape = (3, 256, 256)
+        #     inputShape = (3, 64, 64)
         channel_axis = 1
     else:
-        #     inputShape = (256, 256, 3)
+        #     inputShape = (64, 64, 3)
         channel_axis = -1
 
-    # Input Shape is 3 x 256 x 256
     net = Conv2D(32, (3, 3), strides=(2, 2), padding='valid')(input)
     net = conv_bn(net, 32, 3, 3, padding='valid')
     net = conv_bn(net, 64, 3, 3)

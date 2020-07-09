@@ -10,6 +10,7 @@ import os
 import pathlib
 import cv2
 import random
+import h5py
 from tensorflow.keras import backend as K
 
 
@@ -137,12 +138,16 @@ if __name__ == '__main__':
         inputs = tf.keras.layers.Input(shape=(image_size, image_size, 3))
 
     x = tf.keras.layers.Conv2D(32, (3, 3), strides=(2,2), padding='valid')(inputs)
-    x = IRRCNN.IRCNN_model(x)
+    x = IRRCNN.IRRCNN_model(x)
     x = tf.keras.layers.Dense(units=no_classes, activation='softmax')(x)
 
-    model = tf.keras.models.Model(inputs, x, name='IRCNN')
-    model.summary()
+    model = tf.keras.models.Model(inputs, x, name='IRRCNN')
+    summ = model.summary()
+    print(summ)
 
-    model.compile(loss='sparse_categorical_crossentropy', optimizer= "SGD", metrics=["accuracy"])
+    #l_rate = keras.optimizers.schedules.PolynomialDecay(0.01, 1, end_learning_rate=0.0001, power=1.0, cycle=False)
+    opt = keras.optimizers.SGD(lr = 0.0001)
+    model.compile(loss='sparse_categorical_crossentropy', optimizer= opt, metrics=["accuracy"])
     model.fit(x = X_train, y = y_train, epochs=1, batch_size=32)
+    model.save("IRRCNN.h5")
 
