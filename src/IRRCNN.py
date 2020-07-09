@@ -52,7 +52,7 @@ def RCL(input, kernel_size, filedepth):
     stack4 = Activation('relu')(stack4)
 
     conv3 = Conv2D(filters=filedepth, kernel_size=kernel_size, strides=(1, 1), padding='same',
-                   weights=recurrent_layer.get_weights(),
+                   weights=RCL.get_weights(),
                    kernel_regularizer=keras.regularizers.l2(0.00004),
                    kernel_initializer=keras.initializers.VarianceScaling(scale=2.0, mode='fan_in',
                                                                          distribution='normal', seed=None))(stack4)
@@ -61,7 +61,7 @@ def RCL(input, kernel_size, filedepth):
     stack6 = Activation('relu')(stack6)
 
     conv4 = Conv2D(filters=filedepth, kernel_size=kernel_size, strides=(1, 1), padding='same',
-                   weights=recurrent_layer.get_weights(),
+                   weights=RCL.get_weights(),
                    kernel_regularizer=keras.regularizers.l2(0.00004),
                    kernel_initializer=keras.initializers.VarianceScaling(scale=2.0, mode='fan_in',
                                                                          distribution='normal', seed=None))(stack6)

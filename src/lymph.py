@@ -112,8 +112,8 @@ if __name__ == '__main__':
     X_train, X_test, y_train, y_test = load_dataset('/Users/brazzalenicola/Desktop/lymphoma/')
 
     # Normalize image vectors
-    # X_train = X_train / 255
-    # X_test = X_test / 255
+    X_train = X_train / 255
+    X_test = X_test / 255
 
     # Reshape
     y_train = y_train.T
@@ -145,9 +145,9 @@ if __name__ == '__main__':
     summ = model.summary()
     print(summ)
 
-    #l_rate = keras.optimizers.schedules.PolynomialDecay(0.01, 1, end_learning_rate=0.0001, power=1.0, cycle=False)
-    opt = keras.optimizers.SGD(lr = 0.0001)
+    epochs = 10
+    opt = keras.optimizers.SGD(lr = 1e-2, decay=1e-2/epochs)
     model.compile(loss='sparse_categorical_crossentropy', optimizer= opt, metrics=["accuracy"])
-    model.fit(x = X_train, y = y_train, epochs=1, batch_size=32)
+    model.fit(x = X_train, y = y_train, epochs=epochs, batch_size=32)
     model.save("IRRCNN.h5")
 
