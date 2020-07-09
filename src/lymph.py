@@ -15,7 +15,7 @@ from tensorflow.keras import backend as K
 
 
 # print(tf.__version__)
-from src import IRRCNN
+import IRRCNN
 
 
 def extract_patches(X_set, y_lab):
