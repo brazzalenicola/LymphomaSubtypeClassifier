@@ -85,6 +85,7 @@ def load_dataset(path):
 
     X = np.array(X)
     y = np.array(y)
+    print(y)
     print(X.shape)
     print(y.shape)
 
@@ -102,14 +103,15 @@ def load_dataset(path):
     pickle_in = open("X.pickle", "rb")
     X = pickle.load(pickle_in)
     '''
-    X_train, y_train = extract_patches(X_train, y_train)
-    X_test, y_test = extract_patches(X_test, y_test)
 
     return X_train, X_test, y_train, y_test
 
 
 if __name__ == '__main__':
     X_train, X_test, y_train, y_test = load_dataset('/Users/brazzalenicola/Desktop/lymphoma/')
+
+    X_train, y_train = extract_patches(X_train, y_train)
+    X_test, _ = extract_patches(X_test, y_test)
 
     # Normalize image vectors
     X_train = X_train / 255
@@ -137,17 +139,55 @@ if __name__ == '__main__':
     else:
         inputs = tf.keras.layers.Input(shape=(image_size, image_size, 3))
 
-    x = tf.keras.layers.Conv2D(32, (3, 3), strides=(2,2), padding='valid')(inputs)
+    x = keras.layers.Conv2D(32, (3, 3), strides=(2,2), padding='valid')(inputs)
     x = IRRCNN.IRRCNN_model(x)
-    x = tf.keras.layers.Dense(units=no_classes, activation='softmax')(x)
+    x = keras.layers.Dense(units=no_classes, activation='softmax')(x)
 
     model = tf.keras.models.Model(inputs, x, name='IRRCNN')
     summ = model.summary()
-    print(summ)
+    #print(summ)
 
-    epochs = 10
-    opt = keras.optimizers.SGD(lr = 1e-2, decay=1e-2/epochs)
-    model.compile(loss='sparse_categorical_crossentropy', optimizer= opt, metrics=["accuracy"])
-    model.fit(x = X_train, y = y_train, epochs=epochs, batch_size=32)
-    model.save("IRRCNN.h5")
+    epochs = 1
+    opt = keras.optimizers.SGD(lr = 1e-2)
+    #model.compile(loss='sparse_categorical_crossentropy', optimizer= opt, metrics=["accuracy"])
+    #history = model.fit(x = X_train, y = y_train, epochs=epochs, batch_size=32)
+    #model.save("IRRCNN.h5")
+
+    '''
+    plt.figure()
+    plt.plot(history.history['loss'], label='Train loss')
+    plt.plot(history.history['val_loss'], label='Val loss')
+    plt.legend()
+    plt.xlabel('Epoch')
+    plt.ylabel('Loss')
+
+    # Plot accuracy
+    plt.figure()
+    plt.plot(history.history['acc'], label='Train loss')
+    plt.plot(history.history['val_acc'], label='Val loss')
+    plt.legend()
+    plt.xlabel('Epoch')
+    plt.ylabel('Accuracy')
+    '''
+    testmodel = keras.models.load_model('/Users/brazzalenicola/Desktop/IRRCNN.h5')
+
+    print(X_test.shape)
+
+    y_pred = []
+
+    print("Evaluating...")
+    for i in range(1, X_test.shape[0], 336):
+        print((i/336)/(X_test.shape[0]/336)*100 + "% Completed")
+
+        #Prediction of the patches in a single original image (336 patches per image)
+        yPredictedProbs = testmodel.predict(X_test[i:i+336, :, :, :])
+        yMaxPredictedProbs = np.amax(yPredictedProbs, axis=1)
+        yPredicted = yPredictedProbs.argmax(axis=1)
+        count = np.bincount(yPredicted)
+        y_pred.append(np.argmax(count))
+    
+
+    IRRCNN.print_confusion_matrix(y_test, y_pred, 3, ["CLL", "FL", "MCL"])
+
+
 

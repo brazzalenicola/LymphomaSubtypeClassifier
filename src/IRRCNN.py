@@ -1,10 +1,14 @@
-import tensorflow as tf
 import tensorflow.keras as keras
 from tensorflow.keras.layers import Activation, BatchNormalization, Conv2D, Add
 from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, GlobalAveragePooling2D
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.metrics import confusion_matrix
+
 from tensorflow.keras import backend as K
 
 
+# Implementation of the Improved Residual Recurrent Neural Network
 # Convolution 2D with batch normalization
 def conv_bn(x, nb_filter, num_row, num_col, padding='same', strides=(1, 1), use_bias=False):
     """
@@ -41,10 +45,10 @@ def RCL(input, kernel_size, filedepth):
     stack2 = Activation('relu')(stack2)
 
     RCL = Conv2D(filters=filedepth, kernel_size=kernel_size, strides=(1, 1), padding='same',
-                             kernel_regularizer=keras.regularizers.l2(0.00004),
-                             kernel_initializer=keras.initializers.VarianceScaling(scale=2.0, mode='fan_in',
-                                                                                   distribution='normal',
-                                                                                   seed=None))
+                 kernel_regularizer=keras.regularizers.l2(0.00004),
+                 kernel_initializer=keras.initializers.VarianceScaling(scale=2.0, mode='fan_in',
+                                                                       distribution='normal',
+                                                                       seed=None))
 
     conv2 = RCL(stack2)
     stack3 = Add()([conv1, conv2])
@@ -101,22 +105,69 @@ def IRRCNN_model(input):
     net = conv_bn(net, 32, 3, 3, padding='valid')
     net = conv_bn(net, 64, 3, 3)
 
-    net = IRCNN_block(input)
+    net = IRRCNN_block(input)
 
     net = conv_bn(net, 32, 3, 3, strides=(2, 2), padding='valid')
     net = MaxPooling2D((3, 3), strides=(2, 2), padding='valid')(net)
     net = Dropout(0.5)(net)
 
-    net = IRCNN_block(input)
+    net = IRRCNN_block(input)
 
     net = conv_bn(net, 32, 3, 3, strides=(2, 2), padding='valid')
     net = MaxPooling2D((3, 3), strides=(2, 2), padding='valid')(net)
     net = Dropout(0.5)(net)
 
-    net = IRCNN_block(input)
+    net = IRRCNN_block(input)
 
     net = conv_bn(net, 32, 3, 3, strides=(2, 2), padding='valid')
     net = GlobalAveragePooling2D()(net)
     net = Dropout(0.5)(net)
 
     return net
+
+
+def IRRCNN_block(input):
+    if K.image_data_format() == 'channels_first':
+        channel_axis = 1
+    else:
+        channel_axis = -1
+    net = IRCNN_block(input)
+    net1 = Conv2D(256, (1, 1), padding='valid')(input)
+    net = Add()([net, net1])
+
+    return net
+
+
+def print_confusion_matrix(true_labels, labels, num_classes, class_names):
+    """
+    Args:
+        model: Keras model, already trained
+        images: numpy tensor containing the test images
+                [image_num, height, width, channels]
+        labels: list of int, dataset labels (sparse representation)
+        num_classes: int, number of classes
+        class_names: list of string, name assiciated to each class
+    Return:
+        It prints the confusion matrix
+    """
+    # Get the predicted classifications for the test-set.
+    predictions = labels
+    # Get the true classifications for the test-set.
+
+    # Get the confusion matrix using sklearn.
+    cm = confusion_matrix(y_true=true_labels, y_pred=predictions)
+    # Print the confusion matrix as text.
+    # Plot the confusion matrix as an image.
+    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+    # Make various adjustments to the plot.
+    plt.tight_layout()
+    plt.colorbar()
+    tick_marks = np.arange(num_classes)
+    plt.xticks(tick_marks, class_names)
+    plt.yticks(tick_marks, class_names)
+    plt.xlabel('Predicted')
+    plt.ylabel('True')
+    # Ensure the plot is shown correctly with multiple plots
+    # in a single Notebook cell.
+    plt.title('Confusion matrix')
+    plt.show()
