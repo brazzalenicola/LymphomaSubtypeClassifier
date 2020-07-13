@@ -10,7 +10,7 @@ import os
 import pathlib
 import cv2
 import random
-import h5py
+import pickle
 from tensorflow.keras import backend as K
 
 
@@ -45,7 +45,7 @@ def extract_patches(X_set, y_lab):
     return X, y
 
 
-def load_dataset(path):
+def create_dataset(path):
     """
     Args:
         path: string, path to the folder containing the downloaded datasets
@@ -75,7 +75,7 @@ def load_dataset(path):
             except Exception as e:
                 pass
 
-    random.shuffle(all_data)
+    #random.shuffle(all_data)
 
     X = []  # images
     y = []  # labels
@@ -90,25 +90,44 @@ def load_dataset(path):
     print(y.shape)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=1238164)
-    '''
+
     # Creating the files containing all the information about your model
-    pickle_out = open("X.pickle", "wb")
-    pickle.dump(X, pickle_out)
+    pickle_out = open("X_train.pickle", "wb")
+    pickle.dump(X_train, pickle_out)
     pickle_out.close()
 
-    pickle_out = open("y.pickle", "wb")
-    pickle.dump(y, pickle_out)
+    pickle_out = open("y_train.pickle", "wb")
+    pickle.dump(y_train, pickle_out)
     pickle_out.close()
 
-    pickle_in = open("X.pickle", "rb")
-    X = pickle.load(pickle_in)
-    '''
+    pickle_out = open("X_test.pickle", "wb")
+    pickle.dump(X_train, pickle_out)
+    pickle_out.close()
+
+    pickle_out = open("y_test.pickle", "wb")
+    pickle.dump(y_train, pickle_out)
+    pickle_out.close()
+
+    return _
+
+def load_dataset():
+    pickle_in = open("X_train.pickle", "rb")
+    X_train = pickle.load(pickle_in)
+
+    pickle_in = open("X_test.pickle", "rb")
+    X_test = pickle.load(pickle_in)
+
+    pickle_in = open("y_train.pickle", "rb")
+    y_train = pickle.load(pickle_in)
+
+    pickle_in = open("y_test.pickle", "rb")
+    y_test = pickle.load(pickle_in)
 
     return X_train, X_test, y_train, y_test
 
-
 if __name__ == '__main__':
-    X_train, X_test, y_train, y_test = load_dataset('/Users/brazzalenicola/Desktop/lymphoma/')
+
+    X_train, X_test, y_train, y_test = load_dataset()
 
     X_train, y_train = extract_patches(X_train, y_train)
     X_test, _ = extract_patches(X_test, y_test)
