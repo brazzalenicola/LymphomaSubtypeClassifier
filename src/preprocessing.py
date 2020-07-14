@@ -113,3 +113,21 @@ def load_dataset():
     y_test = pickle.load(pickle_in)
 
     return X_train, X_test, y_train, y_test
+
+def loadTrainingSet():
+    pickle_in = open("X_train.pickle", "rb")
+    X_train = pickle.load(pickle_in)
+
+    pickle_in = open("y_train.pickle", "rb")
+    y_train = pickle.load(pickle_in)
+
+    return X_train, y_train
+
+def loadTestSet():
+    pickle_in = open("X_test.pickle", "rb")
+    X_test = pickle.load(pickle_in)
+
+    pickle_in = open("y_test.pickle", "rb")
+    y_test = pickle.load(pickle_in)
+
+    return X_test, y_test

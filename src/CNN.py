@@ -3,6 +3,8 @@ from tensorflow.keras.layers import Activation, Dense, Conv2D, Input, Softmax
 from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, Flatten
 import numpy as np
 from tensorflow.keras import backend as K
+import preprocessing
+import utils
 
 def CNN_model(input_shape):
     if K.image_data_format() == 'channels_first':
@@ -39,7 +41,8 @@ def CNN_model(input_shape):
 
 def trainCNN(model, ep, input_size):
 
-
+    X_train, y_train = preprocessing.loadTrainingSet()
+    X_train, y_train = preprocessing.extract_patches(X_train, y_train)
     model.compile(loss='sparse_categorical_crossentropy', optimizer='SGD', metrics=["accuracy"])
 
     history = model.fit(X_train, y_train, epochs=ep, batch_size=32)
@@ -49,13 +52,16 @@ def trainCNN(model, ep, input_size):
 
 
 def evaluateCNN(CNNmodel, y_test_imgs):
+
+    X_test, y_test = preprocessing.loadTestSet()
+
     print("Evaluation patch-wise")
     preds = CNNmodel.evaluate(x=X_test, y= y_test)
 
     print("Test Loss = " + str(preds[0]))
     print("Test Accuracy = " + str(preds[1]))
 
-
+    shape = X_test.shape[0]
     y_pred = []
     print("Evaluating...")
     for i in range(1, shape, 336):
@@ -68,5 +74,5 @@ def evaluateCNN(CNNmodel, y_test_imgs):
         count = np.bincount(yPredicted)
         y_pred.append(np.argmax(count))
 
-    IRRCNN.print_confusion_matrix(y_test_imgs, y_pred, 3, ["CLL", "FL", "MCL"])
+    utils.print_confusion_matrix(y_test_imgs, y_pred, 3, ["CLL", "FL", "MCL"])
 
