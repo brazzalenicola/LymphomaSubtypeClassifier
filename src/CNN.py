@@ -49,8 +49,6 @@ def trainCNN(model, ep, input_size):
     model.save("CNN.h5")
 
 
-
-
 def evaluateCNN(CNNmodel, y_test_imgs):
 
     X_test, y_test = preprocessing.loadTestSet()
@@ -61,6 +59,16 @@ def evaluateCNN(CNNmodel, y_test_imgs):
     print("Test Loss = " + str(preds[0]))
     print("Test Accuracy = " + str(preds[1]))
 
+    y_pred = []
+    yPredictedProbs = CNNmodel.predict(X_test)
+    yPredicted = yPredictedProbs.argmax(axis=1)
+    yPredicted = np.reshape(yPredicted, (yPredicted.shape/336, 336))
+
+    for pred in yPredicted:
+        count_bins = np.bincount(pred)
+        y_pred.append(np.argmax(count_bins))
+
+    '''
     shape = X_test.shape[0]
     y_pred = []
     print("Evaluating...")
@@ -73,6 +81,8 @@ def evaluateCNN(CNNmodel, y_test_imgs):
         yPredicted = yPredictedProbs.argmax(axis=1)
         count = np.bincount(yPredicted)
         y_pred.append(np.argmax(count))
-
     utils.print_confusion_matrix(y_test_imgs, y_pred, 3, ["CLL", "FL", "MCL"])
+    '''
+
+
 
