@@ -1,10 +1,7 @@
 import tensorflow.keras as keras
 from tensorflow.keras.layers import Activation, Dense, Conv2D, Input, Softmax
 from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, Flatten
-import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import confusion_matrix
-
 from tensorflow.keras import backend as K
 
 def CNN_model(input_shape):
@@ -29,14 +26,47 @@ def CNN_model(input_shape):
     X = AveragePooling2D(pool_size=(2, 2), strides=None, name='avg_pool1')(X)
     X = Flatten()(X)
     X = Dense(64, activation='relu', name='fc0')(X)
-    X = Dropout(0.33)(X)
+    X = Dropout(0.5)(X)
 
     X = Dense(3, activation='relu', name='fc1')(X)
-    X = Dropout(0.33)(X)
+    X = Dropout(0.5)(X)
     X = Softmax()(X)
     #Dense(units=no_classes, activation='softmax')(x)
 
     CNNmodel = keras.Model(inputs=X_input, outputs=X, name='CNNmodel')
 
     return CNNmodel
+
+def trainCNN(model, ep, input_size):
+
+
+    model.compile(loss='sparse_categorical_crossentropy', optimizer='SGD', metrics=["accuracy"])
+
+    history = model.fit(X_train, y_train, epochs=ep, batch_size=32)
+    model.save("CNN.h5")
+
+
+
+
+def evaluateCNN(CNNmodel, y_test_imgs):
+    print("Evaluation patch-wise")
+    preds = CNNmodel.evaluate(x=X_test, y= y_test)
+
+    print("Test Loss = " + str(preds[0]))
+    print("Test Accuracy = " + str(preds[1]))
+
+
+    y_pred = []
+    print("Evaluating...")
+    for i in range(1, shape, 336):
+        print((i / 336) / (shape / 336) * 100 + "% Completed")
+
+        # Prediction of the patches in a single original image (336 patches per image)
+        yPredictedProbs = CNNmodel.predict(X_test[i:i + 336, :, :, :])
+        yMaxPredictedProbs = np.amax(yPredictedProbs, axis=1)
+        yPredicted = yPredictedProbs.argmax(axis=1)
+        count = np.bincount(yPredicted)
+        y_pred.append(np.argmax(count))
+
+    IRRCNN.print_confusion_matrix(y_test_imgs, y_pred, 3, ["CLL", "FL", "MCL"])
 
