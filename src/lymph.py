@@ -16,6 +16,7 @@ from tensorflow.keras import backend as K
 
 # print(tf.__version__)
 import IRRCNN
+import CNN
 
 
 def extract_patches(X_set, y_lab):
@@ -101,14 +102,12 @@ def create_dataset(path):
     pickle_out.close()
 
     pickle_out = open("X_test.pickle", "wb")
-    pickle.dump(X_train, pickle_out)
+    pickle.dump(X_test, pickle_out)
     pickle_out.close()
 
     pickle_out = open("y_test.pickle", "wb")
-    pickle.dump(y_train, pickle_out)
+    pickle.dump(y_test, pickle_out)
     pickle_out.close()
-
-    return _
 
 def load_dataset():
     pickle_in = open("X_train.pickle", "rb")
@@ -127,10 +126,14 @@ def load_dataset():
 
 if __name__ == '__main__':
 
+    #create_dataset('/Users/brazzalenicola/Desktop/lymphoma')
+
     X_train, X_test, y_train, y_test = load_dataset()
 
+    y_test_imgs = y_test
+
     X_train, y_train = extract_patches(X_train, y_train)
-    X_test, _ = extract_patches(X_test, y_test)
+    X_test, y_test = extract_patches(X_test, y_test)
 
     # Normalize image vectors
     X_train = X_train / 255
@@ -153,6 +156,7 @@ if __name__ == '__main__':
     image_size = 64
     no_classes = 3
 
+    '''
     if K.image_data_format() == 'channels_first':
         inputs = tf.keras.layers.Input(shape=(3, image_size, image_size))
     else:
@@ -171,29 +175,42 @@ if __name__ == '__main__':
     #model.compile(loss='sparse_categorical_crossentropy', optimizer= opt, metrics=["accuracy"])
     #history = model.fit(x = X_train, y = y_train, epochs=epochs, batch_size=32)
     #model.save("IRRCNN.h5")
-
     '''
+
+    #testmodel = keras.models.load_model('/Users/brazzalenicola/Desktop/IRRCNN.h5')
+
+    cnnmodel = CNN.CNN_model((image_size, image_size, 3))
+    print(cnnmodel.summary())
+
+    #opt = keras.optimizers.Adagrad(learning_rate=0.001, initial_accumulator_value=0.1, epsilon=1e-07, name="Adagrad")
+    #opt = keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, amsgrad=False, name="Adam")
+    cnnmodel.compile(loss='sparse_categorical_crossentropy', optimizer='Adagrad', metrics=["accuracy"])
+
+    history = cnnmodel.fit(X_train, y_train, epochs=10, batch_size=64)
+
+    cnnmodel.save("CNN.h5")
     plt.figure()
     plt.plot(history.history['loss'], label='Train loss')
-    plt.plot(history.history['val_loss'], label='Val loss')
     plt.legend()
     plt.xlabel('Epoch')
     plt.ylabel('Loss')
 
     # Plot accuracy
     plt.figure()
-    plt.plot(history.history['acc'], label='Train loss')
-    plt.plot(history.history['val_acc'], label='Val loss')
+    plt.plot(history.history['accuracy'], label='Train accuracy')
     plt.legend()
     plt.xlabel('Epoch')
     plt.ylabel('Accuracy')
-    '''
-    testmodel = keras.models.load_model('/Users/brazzalenicola/Desktop/IRRCNN.h5')
 
-    print(X_test.shape)
+    plt.show()
+
+    preds = cnnmodel.evaluate(x=X_test, y= y_test)
+
+    print("Test Loss = " + str(preds[0]))
+    print("Test Accuracy = " + str(preds[1]))
 
     y_pred = []
-
+    '''
     print("Evaluating...")
     for i in range(1, X_test.shape[0], 336):
         print((i/336)/(X_test.shape[0]/336)*100 + "% Completed")
@@ -207,6 +224,7 @@ if __name__ == '__main__':
     
 
     IRRCNN.print_confusion_matrix(y_test, y_pred, 3, ["CLL", "FL", "MCL"])
+    '''
 
 
 
