@@ -8,14 +8,12 @@ def RCNN_model(input_shape):
 
     model = keras.applications.InceptionV3(include_top=False, weights=None, input_shape= input_shape, pooling='max')
 
-    model.layers.pop()
-    model.layers.pop()
-
     print(model.summary())
 
     new_model = Sequential()
     new_model.add(model)
-
+    new_model.pop()
+    print(model.summary())
     new_model.add(LSTM(128))
     new_model.add(LSTM(128))
     new_model.add(Dropout(0.5))
