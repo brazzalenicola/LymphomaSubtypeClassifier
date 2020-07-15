@@ -86,7 +86,11 @@ if __name__ == '__main__':
     print("Test Loss = " + str(preds[0]))
     print("Test Accuracy = " + str(preds[1]))
     '''
-    input_size = 75
-    RCNNmodel = RCNN.RCNN_model((input_size, input_size, 3))
-    RCNN.RCNNtraining(RCNNmodel, 3)
+    input_size = 64
+    #RCNNmodel = RCNN.RCNN_model((input_size, input_size, 3))
+    #RCNN.RCNNtraining(RCNNmodel, 3)
+    CNNmodel = CNN.CNN_model((input_size, input_size, 3))
+    CNN.trainCNN(CNNmodel, 4)
+    CNN.evaluateCNN(CNNmodel)
+
 
