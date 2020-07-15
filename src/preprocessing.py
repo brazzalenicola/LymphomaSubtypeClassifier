@@ -51,7 +51,7 @@ def create_dataset(path):
     IMG_SIZE = len(list(data_dir.glob('*/*.tif')))
     CLASSES = list([item.name for item in data_dir.glob('*') if item.name != ".DS_Store"])
 
-    # print(CLASSES)
+    print(CLASSES)
     # print(IMG_SIZE)
     all_data = []
 
@@ -62,11 +62,10 @@ def create_dataset(path):
             try:
                 img_array = cv2.imread(os.path.join(path, img))
                 new_array = cv2.resize(img_array, (1344, 1024))
+                print(class_num)
                 all_data.append([new_array, class_num])
             except Exception as e:
                 pass
-
-    #random.shuffle(all_data)
 
     X = []  # images
     y = []  # labels
@@ -76,13 +75,11 @@ def create_dataset(path):
 
     X = np.array(X)
     y = np.array(y)
-    print(y)
-    print(X.shape)
-    print(y.shape)
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.33, random_state=1238164)
 
     # Creating the files containing all the information about your model
+    '''
     pickle_out = open("X_train.pickle", "wb")
     pickle.dump(X_train, pickle_out)
     pickle_out.close()
@@ -98,6 +95,8 @@ def create_dataset(path):
     pickle_out = open("y_test.pickle", "wb")
     pickle.dump(y_test, pickle_out)
     pickle_out.close()
+    '''
+    return X_train, X_test, y_train, y_test
 
 def load_dataset():
     pickle_in = open("X_train.pickle", "rb")

@@ -39,7 +39,7 @@ def CNN_model(input_shape):
 
     return CNNmodel
 
-def trainCNN(model, ep, input_size):
+def trainCNN(model, ep):
 
     X_train, y_train = preprocessing.loadTrainingSet()
     X_train, y_train = preprocessing.extract_patches(X_train, y_train)
@@ -67,6 +67,7 @@ def evaluateCNN(CNNmodel, y_test_imgs):
     for pred in yPredicted:
         count_bins = np.bincount(pred)
         y_pred.append(np.argmax(count_bins))
+    utils.print_confusion_matrix(y_test_imgs, y_pred, 3, ['FL', 'MCL', 'CLL'])
 
     '''
     shape = X_test.shape[0]
