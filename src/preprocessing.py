@@ -9,7 +9,7 @@ import cv2
 import pickle
 
 
-def extract_patches(X_set, y_lab):
+def extract_patches(X_set, y_lab, n_ch):
     """
     Args:
         images set: numpy array containing the images to be processed to extract patches
@@ -30,7 +30,7 @@ def extract_patches(X_set, y_lab):
     image_patches = tf.image.extract_patches(X_set, ksizes, strides, rates, pad)
     print(image_patches.shape)
     b, nr, nc, d = image_patches.shape
-    image_patches = tf.reshape(image_patches, [b * nr * nc, 64, 64, 3])
+    image_patches = tf.reshape(image_patches, [b * nr * nc, 64, 64, n_ch])
     X = image_patches
     y = np.repeat(y_lab, nr * nc)
     return X, y
@@ -100,8 +100,8 @@ def create_dataset(path):
 
 def create_gray_dataset():
     X_train, X_test, y_train, y_test = load_dataset()
-    X_train = np.squeeze(tf.image.rgb_to_grayscale(X_train))
-    X_test = np.squeeze(tf.image.rgb_to_grayscale(X_test))
+    X_train = tf.image.rgb_to_grayscale(X_train)
+    X_test = tf.image.rgb_to_grayscale(X_test)
 
     pickle_out = open("X_train_gray.pickle", "wb")
     pickle.dump(X_train, pickle_out)

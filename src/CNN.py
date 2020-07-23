@@ -40,7 +40,6 @@ def CNN_model(input_shape):
 
 def trainCNN(model, ep, color_space):
 
-
     if(color_space == "gray"):
         X_train, y_train = preprocessing.loadTrainingGraySet()
     elif(color_space == "hsv"):
