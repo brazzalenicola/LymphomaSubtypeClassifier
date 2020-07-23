@@ -98,6 +98,36 @@ def create_dataset(path):
     '''
     return X_train, X_test, y_train, y_test
 
+def create_gray_dataset():
+    X_train, X_test, y_train, y_test = load_dataset()
+    X_train = np.squeeze(tf.image.rgb_to_grayscale(X_train))
+    X_test = np.squeeze(tf.image.rgb_to_grayscale(X_test))
+
+    pickle_out = open("X_train_gray.pickle", "wb")
+    pickle.dump(X_train, pickle_out)
+    pickle_out.close()
+
+    pickle_out = open("X_test_gray.pickle", "wb")
+    pickle.dump(X_test, pickle_out)
+    pickle_out.close()
+
+
+def create_hsv_dataset():
+    X_train, X_test, _, _ = load_dataset()
+
+    X_train = X_train / 255
+    X_test = X_test / 255
+    X_train = tf.image.rgb_to_hsv(X_train)
+    X_test = tf.image.rgb_to_hsv(X_test)
+
+    pickle_out = open("X_train_hsv.pickle", "wb")
+    pickle.dump(X_train, pickle_out)
+    pickle_out.close()
+
+    pickle_out = open("X_test_hsv.pickle", "wb")
+    pickle.dump(X_test, pickle_out)
+    pickle_out.close()
+
 def load_dataset():
     pickle_in = open("X_train.pickle", "rb")
     X_train = pickle.load(pickle_in)
@@ -120,6 +150,34 @@ def loadTrainingSet():
     pickle_in = open("y_train.pickle", "rb")
     y_train = pickle.load(pickle_in)
 
+    n_train = X_train.shape[0]
+    print("number of training examples = " + str(n_train))
+    print("X_train shape: " + str(X_train.shape))
+    print("Y_train shape: " + str(y_train.shape))
+
+    return X_train, y_train
+
+def loadTrainingGraySet():
+    pickle_in = open("X_train_gray.pickle", "rb")
+    X_train = pickle.load(pickle_in)
+
+    pickle_in = open("y_train.pickle", "rb")
+    y_train = pickle.load(pickle_in)
+
+    n_train = X_train.shape[0]
+    print("number of training examples = " + str(n_train))
+    print("X_train shape: " + str(X_train.shape))
+    print("Y_train shape: " + str(y_train.shape))
+
+    return X_train, y_train
+
+def loadTrainingHSVSet():
+    pickle_in = open("X_train_hsv.pickle", "rb")
+    X_train = pickle.load(pickle_in)
+
+    pickle_in = open("y_train.pickle", "rb")
+    y_train = pickle.load(pickle_in)
+
     return X_train, y_train
 
 def loadTestSet():
@@ -128,5 +186,9 @@ def loadTestSet():
 
     pickle_in = open("y_test.pickle", "rb")
     y_test = pickle.load(pickle_in)
+
+    print("number of test examples = " + str(X_test.shape[0]))
+    print("X_test shape: " + str(X_test.shape))
+    print("Y_test shape: " + str(y_test.shape))
 
     return X_test, y_test

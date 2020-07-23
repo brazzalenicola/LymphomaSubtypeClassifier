@@ -2,7 +2,8 @@ import tensorflow.keras as keras
 from tensorflow.keras.layers import Activation, Dense, Conv2D, Input, Softmax
 from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, Flatten
 import numpy as np
-from tensorflow.keras import backend as K
+import tensorflow as tf
+from skimage.color import rgb2gray, rgb2hsv
 import preprocessing
 import utils
 
@@ -37,9 +38,16 @@ def CNN_model(input_shape):
 
     return CNNmodel
 
-def trainCNN(model, ep):
+def trainCNN(model, ep, color_space):
 
-    X_train, y_train = preprocessing.loadTrainingSet()
+
+    if(color_space == "gray"):
+        X_train, y_train = preprocessing.loadTrainingGraySet()
+    elif(color_space == "hsv"):
+        X_train, y_train = preprocessing.loadTrainingHSVSet()
+    else:
+        X_train, y_train = preprocessing.loadTrainingSet()
+
     X_train, y_train = preprocessing.extract_patches(X_train, y_train)
 
     history = model.fit(X_train, y_train, epochs=ep, batch_size=32)
@@ -54,7 +62,7 @@ def evaluateCNN(CNNmodel):
     X_test, y_test = preprocessing.extract_patches(X_test, y_test)
 
 
-    print("Evaluation patch-wise")
+    print("Evaluation patch-wise:")
     preds = CNNmodel.evaluate(x=X_test, y= y_test)
 
     print("Test Loss = " + str(preds[0]))
@@ -68,6 +76,7 @@ def evaluateCNN(CNNmodel):
     for pred in yPredicted:
         count_bins = np.bincount(pred)
         y_pred.append(np.argmax(count_bins))
+    print("Accuracy image wise: " + str((np.sum(y_test_imgs == y_pred) / 124) * 100) + " %")
     utils.print_confusion_matrix(y_test_imgs, y_pred, 3, ['FL', 'MCL', 'CLL'])
 
 
