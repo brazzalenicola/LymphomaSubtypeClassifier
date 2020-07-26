@@ -7,7 +7,7 @@ from skimage.color import rgb2gray, rgb2hsv
 import preprocessing
 import utils
 
-def CNN_model(input_shape):
+def CNN_model(input_shape, class_layers = True):
 
     X_input = Input(input_shape)
     X = Conv2D(32, (5, 5), strides=(1, 1), name='conv0')(X_input)
@@ -23,12 +23,14 @@ def CNN_model(input_shape):
 
     X = AveragePooling2D(pool_size=(2, 2), strides=None, name='avg_pool1')(X)
     X = Flatten()(X)
-    X = Dense(64, activation='relu', name='fc0')(X)
-    X = Dropout(0.5)(X)
 
-    X = Dense(3, activation='relu', name='fc1')(X)
-    X = Dropout(0.5)(X)
-    X = Softmax()(X)
+    if(class_layers):
+        X = Dense(64, activation='relu', name='fc0')(X)
+        X = Dropout(0.5)(X)
+
+        X = Dense(3, activation='relu', name='fc1')(X)
+        X = Dropout(0.5)(X)
+        X = Softmax()(X)
 
     CNNmodel = keras.Model(inputs=X_input, outputs=X, name='CNNmodel')
 
