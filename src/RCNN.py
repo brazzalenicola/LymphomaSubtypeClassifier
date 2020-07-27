@@ -1,30 +1,37 @@
 import tensorflow.keras as keras
-from tensorflow.keras.layers import Dense, LSTM, Dropout
-from tensorflow.keras.layers import GlobalMaxPool2D, Input, Reshape, Add
+from tensorflow.keras.layers import Activation, Dense, Conv2D, Input, Reshape, Add, LSTM
+from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, Flatten, concatenate
 import preprocessing
 import utils
-import CNN
-
 
 def RCNN_model(input_shape):
 
-    cnn_model = CNN.CNN_model(input_shape, class_layers = False)
-    cnn_model.layers.pop()
-    #print(cnn_model.summary())
-
     X_input = Input(input_shape)
-    X = Reshape((64*64, 3))(X_input)
-    X = LSTM(128, name='lstm0', return_sequences=True)(X)
-    rec_last = LSTM(128, name='lstm1')(X)
+    X = Conv2D(32, (5, 5), strides=(1, 1), name='conv0')(X_input)
+    X = MaxPooling2D(pool_size=(3, 3), strides=(2, 2), name='max_pool0')(X)
+    X = Activation('relu')(X)
 
-    last_cnn = cnn_model.layers[-1]
+    X = Conv2D(32, (5, 5), strides=(1, 1), name='conv1')(X)
+    X = Activation('relu')(X)
 
-    X = Add()([rec_last, last_cnn])
+    X = AveragePooling2D(pool_size=(2, 2), strides=None, name='avg_pool0')(X)
+    X = Conv2D(64, (5, 5), strides=(1, 1), name='conv2')(X)
+    X = Activation('relu')(X)
 
-    X = Dense(1024, activation='relu', name='fc0')(X)
-    X = Dropout(0.5)(X)
+    X = AveragePooling2D(pool_size=(2, 2), strides=None, name='avg_pool1')(X)
+    last_cnn = Flatten()(X)
 
-    X = Dense(512, activation='relu', name='fc1')(X)
+    X = Reshape((64 * 64, 3))(X_input)
+    X = LSTM(32, name='lstm0', return_sequences=True)(X)
+    rec_last = LSTM(32, name='lstm1')(X)
+
+    #X = Add()([rec_last, last_cnn])
+    X = concatenate([rec_last, last_cnn])
+
+    #X = Dense(512, activation='relu', name='fc0')(X)
+    #X = Dropout(0.5)(X)
+
+    X = Dense(64, activation='relu', name='fc1')(X)
     X = Dropout(0.5)(X)
 
     X = Dense(3, activation='softmax')(X)
@@ -40,12 +47,12 @@ def RCNN_model(input_shape):
 
     return rec_model
 
-def trainRCNN(model, ep):
 
+def trainRCNN(rec_model, ep):
     X_train, y_train = preprocessing.loadTrainingSet()
     X_train, y_train = preprocessing.extract_patches(X_train, y_train, 3)
 
-    X_train = keras.layers.ZeroPadding2D(padding=11, data_format='channels_last')(X_train)
-    history = model.fit(X_train, y_train, epochs=ep, batch_size=1)
+    # X_train = keras.layers.ZeroPadding2D(padding=11, data_format='channels_last')(X_train)
+    history = rec_model.fit(X_train, y_train, epochs=ep, batch_size=32)
     utils.plot_Accuracy_Loss(history)
-    model.save("RCNN.h5")
+    rec_model.save("RCNN.h5")

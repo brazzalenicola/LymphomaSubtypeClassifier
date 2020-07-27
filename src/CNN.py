@@ -7,7 +7,7 @@ from skimage.color import rgb2gray, rgb2hsv
 import preprocessing
 import utils
 
-def CNN_model(input_shape, class_layers = True):
+def CNN_model(input_shape):
 
     X_input = Input(input_shape)
     X = Conv2D(32, (5, 5), strides=(1, 1), name='conv0')(X_input)
@@ -24,20 +24,21 @@ def CNN_model(input_shape, class_layers = True):
     X = AveragePooling2D(pool_size=(2, 2), strides=None, name='avg_pool1')(X)
     X = Flatten()(X)
 
-    if(class_layers):
-        X = Dense(64, activation='relu', name='fc0')(X)
-        X = Dropout(0.5)(X)
 
-        X = Dense(3, activation='relu', name='fc1')(X)
-        X = Dropout(0.5)(X)
-        X = Softmax()(X)
+    X = Dense(64, activation='relu', name='fc0')(X)
+    X = Dropout(0.5)(X)
+
+    X = Dense(3, activation='relu', name='fc1')(X)
+    X = Dropout(0.5)(X)
+    X = Softmax()(X)
 
     CNNmodel = keras.Model(inputs=X_input, outputs=X, name='CNNmodel')
+
 
     lr_schedule = keras.optimizers.schedules.ExponentialDecay(initial_learning_rate=1e-1, decay_steps=5250, decay_rate=0.9)
     opt = keras.optimizers.SGD(learning_rate=lr_schedule)
     CNNmodel.compile(loss='sparse_categorical_crossentropy', optimizer=opt, metrics=["accuracy"])
-
+    print(CNNmodel.summary())
     return CNNmodel
 
 def trainCNN(model, ep, color_space):
