@@ -111,7 +111,6 @@ def create_gray_dataset():
     pickle.dump(X_test, pickle_out)
     pickle_out.close()
 
-
 def create_hsv_dataset():
     X_train, X_test, _, _ = load_dataset()
 
@@ -126,6 +125,22 @@ def create_hsv_dataset():
 
     pickle_out = open("X_test_hsv.pickle", "wb")
     pickle.dump(X_test, pickle_out)
+    pickle_out.close()
+
+def create_yuv_dataset():
+    X_train, X_test, _, _ = load_dataset()
+
+    X_train = X_train / 255
+    X_test = X_test / 255
+    X_train = tf.image.rgb_to_yuv(X_train)
+    X_test = tf.image.rgb_to_yuv(X_test)
+
+    pickle_out = open("X_train_yuv.pickle", "wb")
+    pickle.dump(X_train, pickle_out, protocol=4)
+    pickle_out.close()
+
+    pickle_out = open("X_test_yuv.pickle", "wb")
+    pickle.dump(X_test, pickle_out, protocol=4)
     pickle_out.close()
 
 def load_dataset():
@@ -173,6 +188,15 @@ def loadTrainingGraySet():
 
 def loadTrainingHSVSet():
     pickle_in = open("X_train_hsv.pickle", "rb")
+    X_train = pickle.load(pickle_in)
+
+    pickle_in = open("y_train.pickle", "rb")
+    y_train = pickle.load(pickle_in)
+
+    return X_train, y_train
+
+def loadTrainingYUVSet():
+    pickle_in = open("X_train_yuv.pickle", "rb")
     X_train = pickle.load(pickle_in)
 
     pickle_in = open("y_train.pickle", "rb")

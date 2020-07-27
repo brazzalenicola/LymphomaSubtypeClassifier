@@ -39,9 +39,9 @@ if __name__ == '__main__':
     hsv_model.save("CNN_hsv.h5")
     '''
 
+    rcnn = RCNN.RCNN_model((64, 64, 3))
 
-    rcnn = RCNN.RCNN_model((64,64,3))
-    history = RCNN.trainRCNN(rcnn, 70)
+    #history = RCNN.trainRCNN(rcnn, 3)
 
     '''
     print("Evaluation patch-wise:")
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         count_bins = np.bincount(pred)
         y_pred.append(np.argmax(count_bins))
 
-    print("Accuracy image wise: " + str((np.sum(y_test_lab == y_pred) / 124) * 100) + " %")
+    print("Image-wise Accuracy: " + str((np.sum(y_test_lab == y_pred) / 124) * 100) + " %")
     '''
 
 
