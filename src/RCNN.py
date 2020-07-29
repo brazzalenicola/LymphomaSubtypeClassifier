@@ -3,6 +3,7 @@ from tensorflow.keras.layers import Activation, Dense, Conv2D, Input, Reshape, A
 from tensorflow.keras.layers import AveragePooling2D, MaxPooling2D, Dropout, Flatten, concatenate
 import preprocessing
 import utils
+import numpy as np
 
 def RCNN_model(input_shape):
 
@@ -56,3 +57,30 @@ def trainRCNN(rec_model, ep):
     history = rec_model.fit(X_train, y_train, epochs=ep, batch_size=32)
     utils.plot_Accuracy_Loss(history)
     rec_model.save("RCNN.h5")
+
+def evaluateRCNN(RCNNmodel):
+
+    X_test, y_test = preprocessing.loadTestSet()
+    y_test_imgs = y_test
+    X_test, y_test = preprocessing.extract_patches(X_test, y_test)
+
+
+    print("Evaluation patch-wise:")
+    preds = RCNNmodel.evaluate(x=X_test, y= y_test)
+
+    print("Test Loss = " + str(preds[0]))
+    print("Test Accuracy = " + str(preds[1]))
+
+    y_pred = []
+    yPredictedProbs = RCNNmodel.predict(X_test)
+    yPredicted = yPredictedProbs.argmax(axis=1)
+    yPredicted = np.reshape(yPredicted, (yPredicted.shape/336, 336))
+
+    for pred in yPredicted:
+        count_bins = np.bincount(pred)
+        y_pred.append(np.argmax(count_bins))
+
+    print("Accuracy image wise: " + str((np.sum(y_test_imgs == y_pred) / 124) * 100) + " %")
+    #utils.print_confusion_matrix(y_test_imgs, y_pred, 3, ['FL', 'MCL', 'CLL'])
+
+
