@@ -4,4 +4,3 @@
 *.pyc
 *.DS_Store
 *.pickle
-src/IRRCNN.py
