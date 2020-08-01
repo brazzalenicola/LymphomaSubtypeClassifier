@@ -165,11 +165,12 @@ def loadTrainingSet():
     pickle_in = open("y_train.pickle", "rb")
     y_train = pickle.load(pickle_in)
 
+    '''
     n_train = X_train.shape[0]
     print("number of training examples = " + str(n_train))
     print("X_train shape: " + str(X_train.shape))
     print("Y_train shape: " + str(y_train.shape))
-
+    '''
     return X_train, y_train
 
 def loadTrainingGraySet():
@@ -179,14 +180,24 @@ def loadTrainingGraySet():
     pickle_in = open("y_train.pickle", "rb")
     y_train = pickle.load(pickle_in)
 
+    '''
     n_train = X_train.shape[0]
     print("number of training examples = " + str(n_train))
     print("X_train shape: " + str(X_train.shape))
     print("Y_train shape: " + str(y_train.shape))
-
+    '''
     return X_train, y_train
 
-def loadTrainingHSVSet():
+def loadTestGraySet():
+    pickle_in = open("X_test_gray.pickle", "rb")
+    X_test = pickle.load(pickle_in)
+
+    pickle_in = open("y_test.pickle", "rb")
+    y_test = pickle.load(pickle_in)
+
+    return X_test, y_test
+
+def loadTrainingGraySet():
     pickle_in = open("X_train_hsv.pickle", "rb")
     X_train = pickle.load(pickle_in)
 
@@ -194,6 +205,15 @@ def loadTrainingHSVSet():
     y_train = pickle.load(pickle_in)
 
     return X_train, y_train
+
+def loadTestHSVSet():
+    pickle_in = open("X_test_hsv.pickle", "rb")
+    X_test = pickle.load(pickle_in)
+
+    pickle_in = open("y_test.pickle", "rb")
+    y_test = pickle.load(pickle_in)
+
+    return X_test, y_test
 
 def loadTrainingYUVSet():
     pickle_in = open("X_train_yuv.pickle", "rb")
@@ -203,6 +223,17 @@ def loadTrainingYUVSet():
     y_train = pickle.load(pickle_in)
 
     return X_train, y_train
+def loadTestYUVSet():
+
+    pickle_in = open("X_test_yuv.pickle", "rb")
+    X_test = pickle.load(pickle_in)
+
+    pickle_in = open("y_test.pickle", "rb")
+    y_test = pickle.load(pickle_in)
+
+    return X_test, y_test
+
+
 
 def loadTestSet():
     pickle_in = open("X_test.pickle", "rb")

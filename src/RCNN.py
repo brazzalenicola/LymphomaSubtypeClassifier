@@ -26,7 +26,6 @@ def RCNN_model(input_shape):
     X = LSTM(32, name='lstm0', return_sequences=True)(X)
     rec_last = LSTM(32, name='lstm1')(X)
 
-    #X = Add()([rec_last, last_cnn])
     X = concatenate([rec_last, last_cnn])
 
     #X = Dense(512, activation='relu', name='fc0')(X)
@@ -49,24 +48,46 @@ def RCNN_model(input_shape):
     return rec_model
 
 
-def trainRCNN(rec_model, ep):
-    X_train, y_train = preprocessing.loadTrainingSet()
-    X_train, y_train = preprocessing.extract_patches(X_train, y_train, 3)
+def trainRCNN(rec_model, ep, color_space):
+
+    #number of channels
+    nch = 3
+    if(color_space == "gray"):
+        X_train, y_train = preprocessing.loadTrainingGraySet()
+        nch = 1
+    elif(color_space == "hsv"):
+        X_train, y_train = preprocessing.loadTrainingHSVSet()
+    elif(color_space == "yuv"):
+        X_train, y_train = preprocessing.loadTrainingYUVSet()
+    else:
+        X_train, y_train = preprocessing.loadTrainingSet()
+
+
+    X_train, y_train = preprocessing.extract_patches(X_train, y_train, nch)
 
     # X_train = keras.layers.ZeroPadding2D(padding=11, data_format='channels_last')(X_train)
     history = rec_model.fit(X_train, y_train, epochs=ep, batch_size=32)
     utils.plot_Accuracy_Loss(history)
     rec_model.save("RCNN.h5")
 
-def evaluateRCNN(RCNNmodel):
+def evaluateRCNN(RCNNmodel, color_space):
 
-    X_test, y_test = preprocessing.loadTestSet()
+    nch = 3
+    if(color_space == "gray"):
+        X_test, y_test = preprocessing.loadTestGraySet()
+        nch = 1
+    elif(color_space == "hsv"):
+        X_test, y_test = preprocessing.loadTestHSVSet()
+    elif(color_space == "yuv"):
+        X_test, y_test = preprocessing.loadTestYUVSet()
+    else:
+        X_test, y_test = preprocessing.loadTestSet()
+
     y_test_imgs = y_test
-    X_test, y_test = preprocessing.extract_patches(X_test, y_test)
+    X_test, y_test = preprocessing.extract_patches(X_test, y_test, nch)
 
-
-    print("Evaluation patch-wise:")
-    preds = RCNNmodel.evaluate(x=X_test, y= y_test)
+    print("Patch-Wise Evaluation:")
+    preds = RCNNmodel.evaluate(x=X_test, y=y_test)
 
     print("Test Loss = " + str(preds[0]))
     print("Test Accuracy = " + str(preds[1]))
@@ -80,7 +101,7 @@ def evaluateRCNN(RCNNmodel):
         count_bins = np.bincount(pred)
         y_pred.append(np.argmax(count_bins))
 
-    print("Accuracy image wise: " + str((np.sum(y_test_imgs == y_pred) / 124) * 100) + " %")
-    #utils.print_confusion_matrix(y_test_imgs, y_pred, 3, ['FL', 'MCL', 'CLL'])
+    print("Image-Wise Evaluation: " + str((np.sum(y_test_imgs == y_pred) / 124) * 100) + " %")
+    utils.print_confusion_matrix(y_test_imgs, y_pred, 3, ['FL', 'MCL', 'CLL'])
 
 

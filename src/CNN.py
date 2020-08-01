@@ -43,29 +43,44 @@ def CNN_model(input_shape):
 
 def trainCNN(model, ep, color_space):
 
+    #number of channels
+    nch = 3
     if(color_space == "gray"):
         X_train, y_train = preprocessing.loadTrainingGraySet()
+        nch = 1
     elif(color_space == "hsv"):
         X_train, y_train = preprocessing.loadTrainingHSVSet()
+    elif(color_space == "yuv"):
+        X_train, y_train = preprocessing.loadTrainingYUVSet()
     else:
         X_train, y_train = preprocessing.loadTrainingSet()
 
-    X_train, y_train = preprocessing.extract_patches(X_train, y_train)
+
+    X_train, y_train = preprocessing.extract_patches(X_train, y_train, nch)
 
     history = model.fit(X_train, y_train, epochs=ep, batch_size=32)
     utils.plot_Accuracy_Loss(history)
     model.save("CNN.h5")
 
 
-def evaluateCNN(CNNmodel):
+def evaluateCNN(CNNmodel, color_space):
 
-    X_test, y_test = preprocessing.loadTestSet()
+    nch = 3
+    if(color_space == "gray"):
+        X_test, y_test = preprocessing.loadTestGraySet()
+        nch = 1
+    elif(color_space == "hsv"):
+        X_test, y_test = preprocessing.loadTestHSVSet()
+    elif(color_space == "yuv"):
+        X_test, y_test = preprocessing.loadTestYUVSet()
+    else:
+        X_test, y_test = preprocessing.loadTestSet()
+
     y_test_imgs = y_test
-    X_test, y_test = preprocessing.extract_patches(X_test, y_test)
+    X_test, y_test = preprocessing.extract_patches(X_test, y_test, nch)
 
-
-    print("Evaluation patch-wise:")
-    preds = CNNmodel.evaluate(x=X_test, y= y_test)
+    print("Patch-Wise Evaluation:")
+    preds = CNNmodel.evaluate(x=X_test, y=y_test)
 
     print("Test Loss = " + str(preds[0]))
     print("Test Accuracy = " + str(preds[1]))
@@ -78,7 +93,7 @@ def evaluateCNN(CNNmodel):
     for pred in yPredicted:
         count_bins = np.bincount(pred)
         y_pred.append(np.argmax(count_bins))
-    print("Accuracy image wise: " + str((np.sum(y_test_imgs == y_pred) / 124) * 100) + " %")
+    print("Image-Wise Evaluation: " + str((np.sum(y_test_imgs == y_pred) / 124) * 100) + " %")
     utils.print_confusion_matrix(y_test_imgs, y_pred, 3, ['FL', 'MCL', 'CLL'])
 
 
